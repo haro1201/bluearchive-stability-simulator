@@ -11,26 +11,37 @@ if "dataset" not in st.session_state:
 
 # --- フォーム（追加） ---
 with st.form("atk_form", clear_on_submit=False):
-    normal_min = st.number_input(
+    # 1行目: 通常ダメージ
+    row1 = st.columns(2)
+    normal_min = row1[0].number_input(
         "通常ダメージ下限", min_value=0, value=st.session_state.get("normal_min", 1000), key="normal_min"
     )
-    normal_max = st.number_input(
+    normal_max = row1[1].number_input(
         "通常ダメージ上限", min_value=0, value=st.session_state.get("normal_max", 2000), key="normal_max"
     )
-    crit_min = st.number_input(
+
+    # 2行目: 会心ダメージ
+    row2 = st.columns(2)
+    crit_min = row2[0].number_input(
         "会心ダメージ下限", min_value=0, value=st.session_state.get("crit_min", 2000), key="crit_min"
     )
-    crit_max = st.number_input(
+    crit_max = row2[1].number_input(
         "会心ダメージ上限", min_value=0, value=st.session_state.get("crit_max", 4000), key="crit_max"
     )
-    crit_rate = st.number_input(
+
+    # 3行目: 会心確率とヒット数
+    row3 = st.columns(2)
+    crit_rate = row3[0].number_input(
         "会心確率(%)", min_value=0.0, max_value=100.0, value=st.session_state.get("crit_rate", 50.0), key="crit_rate"
     )
-    hits = st.number_input(
+    hits = row3[1].number_input(
         "ヒット数", min_value=1, value=st.session_state.get("hits", 1), step=1, key="hits"
     )
 
-    submitted = st.form_submit_button("追加")
+    # 4行目: 追加ボタン（中央配置・横幅いっぱい）
+    btn_col1, btn_col2, btn_col3 = st.columns([1,2,1])
+    with btn_col2:
+        submitted = st.form_submit_button("追加", use_container_width=True)
 
     if submitted:
         # バリデーション
