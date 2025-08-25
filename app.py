@@ -54,22 +54,22 @@ with st.form("atk_form", clear_on_submit=False):
 st.subheader("攻撃パターン一覧")
 
 if st.session_state.dataset:
+    # ヘッダー行
     header_cols = st.columns([0.1, 1, 1, 1, 1, 0.7, 0.7, 0.3])
     headers = ["No.", "通常下限", "通常上限", "会心下限", "会心上限", "会心率(%)", "ヒット数", ""]
     for c, h in zip(header_cols, headers):
         c.markdown(f"<div style='text-align:center;font-weight:bold'>{h}</div>", unsafe_allow_html=True)
 
-    deleted_idx = None
+    # 各行
     for i, entry in enumerate(st.session_state.dataset):
         cols = st.columns([0.1, 1, 1, 1, 1, 0.7, 0.7, 0.3], gap=None)
-        # 中央揃えで表示
         cols[0].markdown(f"<div style='text-align:center'>{i+1}</div>", unsafe_allow_html=True)
-        cols[1].markdown(f"<div style='text-align:center'>{entry['normal_min']}</div>", unsafe_allow_html=True)
-        cols[2].markdown(f"<div style='text-align:center'>{entry['normal_max']}</div>", unsafe_allow_html=True)
-        cols[3].markdown(f"<div style='text-align:center'>{entry['crit_min']}</div>", unsafe_allow_html=True)
-        cols[4].markdown(f"<div style='text-align:center'>{entry['crit_max']}</div>", unsafe_allow_html=True)
-        cols[5].markdown(f"<div style='text-align:center'>{entry['crit_rate']}</div>", unsafe_allow_html=True)
-        cols[6].markdown(f"<div style='text-align:center'>{entry['hits']}</div>", unsafe_allow_html=True)
+        cols[1].markdown(f"<div style='text-align:center'>{int(entry['normal_min'])}</div>", unsafe_allow_html=True)
+        cols[2].markdown(f"<div style='text-align:center'>{int(entry['normal_max'])}</div>", unsafe_allow_html=True)
+        cols[3].markdown(f"<div style='text-align:center'>{int(entry['crit_min'])}</div>", unsafe_allow_html=True)
+        cols[4].markdown(f"<div style='text-align:center'>{int(entry['crit_max'])}</div>", unsafe_allow_html=True)
+        cols[5].markdown(f"<div style='text-align:center'>{entry['crit_rate']:.2f}</div>", unsafe_allow_html=True)
+        cols[6].markdown(f"<div style='text-align:center'>{int(entry['hits'])}</div>", unsafe_allow_html=True)
         if cols[7].button("削除", key=f"del_row_{i}"):
             st.session_state.dataset.pop(i)
             st.success(f"行 {i+1} を削除しました。")
