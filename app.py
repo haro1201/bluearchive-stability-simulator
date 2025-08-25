@@ -5,6 +5,30 @@ import numpy as np
 st.set_page_config(layout="wide")
 st.title("安定値ガチャシミュレーター")
 
+st.markdown(
+    """
+    <style>
+    /* Streamlit 全ボタンの共通スタイル */
+    div.stButton > button {
+        background-color: #4CAF50;  /* 緑系統 */
+        color: white;               /* 文字色を白に */
+        height: 50px;               /* ボタン高さ */
+        width: 100%;                /* 横幅いっぱい */
+        font-size: 16px;            /* 文字サイズ */
+        border-radius: 8px;         /* 角丸 */
+        border: none;               /* 枠線なし */
+    }
+
+    /* ホバー時の色 */
+    div.stButton > button:hover {
+        background-color: #45a049;
+        color: white;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # --- 初期化 ---
 if "dataset" not in st.session_state:
     st.session_state.dataset = []
