@@ -5,32 +5,67 @@ import numpy as np
 st.set_page_config(layout="wide")
 st.title("安定値ガチャシミュレーター")
 
+st.markdown(
+    """
+    <style>
+    /* Streamlit 全ボタンの共通スタイル */
+    div.stButton > button {
+        background-color: #4CAF50;  /* 緑系統 */
+        color: white;               /* 文字色を白に */
+        height: 50px;               /* ボタン高さ */
+        width: 100%;                /* 横幅いっぱい */
+        font-size: 16px;            /* 文字サイズ */
+        border-radius: 8px;         /* 角丸 */
+        border: none;               /* 枠線なし */
+    }
+
+    /* ホバー時の色 */
+    div.stButton > button:hover {
+        background-color: #45a049;
+        color: white;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # --- 初期化 ---
 if "dataset" not in st.session_state:
     st.session_state.dataset = []
 
 # --- フォーム（追加） ---
 with st.form("atk_form", clear_on_submit=False):
-    normal_min = st.number_input(
+    # 1行目: 通常ダメージ
+    row1 = st.columns(2)
+    normal_min = row1[0].number_input(
         "通常ダメージ下限", min_value=0, value=st.session_state.get("normal_min", 1000), key="normal_min"
     )
-    normal_max = st.number_input(
+    normal_max = row1[1].number_input(
         "通常ダメージ上限", min_value=0, value=st.session_state.get("normal_max", 2000), key="normal_max"
     )
-    crit_min = st.number_input(
+
+    # 2行目: 会心ダメージ
+    row2 = st.columns(2)
+    crit_min = row2[0].number_input(
         "会心ダメージ下限", min_value=0, value=st.session_state.get("crit_min", 2000), key="crit_min"
     )
-    crit_max = st.number_input(
+    crit_max = row2[1].number_input(
         "会心ダメージ上限", min_value=0, value=st.session_state.get("crit_max", 4000), key="crit_max"
     )
-    crit_rate = st.number_input(
+
+    # 3行目: 会心確率とヒット数
+    row3 = st.columns(2)
+    crit_rate = row3[0].number_input(
         "会心確率(%)", min_value=0.0, max_value=100.0, value=st.session_state.get("crit_rate", 50.0), key="crit_rate"
     )
-    hits = st.number_input(
+    hits = row3[1].number_input(
         "ヒット数", min_value=1, value=st.session_state.get("hits", 1), step=1, key="hits"
     )
 
-    submitted = st.form_submit_button("追加")
+    # 4行目: 追加ボタン（中央配置・横幅いっぱい）
+    btn_col1, btn_col2, btn_col3 = st.columns([1,2,1])
+    with btn_col2:
+        submitted = st.form_submit_button("追加", use_container_width=True)
 
     if submitted:
         # バリデーション
@@ -54,22 +89,22 @@ with st.form("atk_form", clear_on_submit=False):
 st.subheader("攻撃パターン一覧")
 
 if st.session_state.dataset:
+    # ヘッダー行
     header_cols = st.columns([0.1, 1, 1, 1, 1, 0.7, 0.7, 0.3])
     headers = ["No.", "通常下限", "通常上限", "会心下限", "会心上限", "会心率(%)", "ヒット数", ""]
     for c, h in zip(header_cols, headers):
         c.markdown(f"<div style='text-align:center;font-weight:bold'>{h}</div>", unsafe_allow_html=True)
 
-    deleted_idx = None
+    # 各行
     for i, entry in enumerate(st.session_state.dataset):
         cols = st.columns([0.1, 1, 1, 1, 1, 0.7, 0.7, 0.3], gap=None)
-        # 中央揃えで表示
         cols[0].markdown(f"<div style='text-align:center'>{i+1}</div>", unsafe_allow_html=True)
-        cols[1].markdown(f"<div style='text-align:center'>{entry['normal_min']}</div>", unsafe_allow_html=True)
-        cols[2].markdown(f"<div style='text-align:center'>{entry['normal_max']}</div>", unsafe_allow_html=True)
-        cols[3].markdown(f"<div style='text-align:center'>{entry['crit_min']}</div>", unsafe_allow_html=True)
-        cols[4].markdown(f"<div style='text-align:center'>{entry['crit_max']}</div>", unsafe_allow_html=True)
-        cols[5].markdown(f"<div style='text-align:center'>{entry['crit_rate']}</div>", unsafe_allow_html=True)
-        cols[6].markdown(f"<div style='text-align:center'>{entry['hits']}</div>", unsafe_allow_html=True)
+        cols[1].markdown(f"<div style='text-align:center'>{int(entry['normal_min'])}</div>", unsafe_allow_html=True)
+        cols[2].markdown(f"<div style='text-align:center'>{int(entry['normal_max'])}</div>", unsafe_allow_html=True)
+        cols[3].markdown(f"<div style='text-align:center'>{int(entry['crit_min'])}</div>", unsafe_allow_html=True)
+        cols[4].markdown(f"<div style='text-align:center'>{int(entry['crit_max'])}</div>", unsafe_allow_html=True)
+        cols[5].markdown(f"<div style='text-align:center'>{entry['crit_rate']:.2f}</div>", unsafe_allow_html=True)
+        cols[6].markdown(f"<div style='text-align:center'>{int(entry['hits'])}</div>", unsafe_allow_html=True)
         if cols[7].button("削除", key=f"del_row_{i}"):
             st.session_state.dataset.pop(i)
             st.success(f"行 {i+1} を削除しました。")
