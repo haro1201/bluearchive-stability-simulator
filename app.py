@@ -8,18 +8,15 @@ st.title("安定値ガチャシミュレーター")
 st.markdown(
     """
     <style>
-    /* Streamlit 全ボタンの共通スタイル */
     div.stButton > button {
-        background-color: #4CAF50;  /* 緑系統 */
-        color: white;               /* 文字色を白に */
-        height: 50px;               /* ボタン高さ */
-        width: 100%;                /* 横幅いっぱい */
-        font-size: 16px;            /* 文字サイズ */
-        border-radius: 8px;         /* 角丸 */
-        border: none;               /* 枠線なし */
+        background-color: #4CAF50;
+        color: white;
+        height: 50px;
+        width: 100%;
+        font-size: 16px;
+        border-radius: 8px;
+        border: none;
     }
-
-    /* ホバー時の色 */
     div.stButton > button:hover {
         background-color: #45a049;
         color: white;
@@ -35,7 +32,6 @@ if "dataset" not in st.session_state:
 
 # --- フォーム（追加） ---
 with st.form("atk_form", clear_on_submit=False):
-    # 1行目: 通常ダメージ
     row1 = st.columns(2)
     normal_min = row1[0].number_input(
         "通常ダメージ下限", min_value=0, value=st.session_state.get("normal_min", 1000), key="normal_min"
@@ -44,7 +40,6 @@ with st.form("atk_form", clear_on_submit=False):
         "通常ダメージ上限", min_value=0, value=st.session_state.get("normal_max", 2000), key="normal_max"
     )
 
-    # 2行目: 会心ダメージ
     row2 = st.columns(2)
     crit_min = row2[0].number_input(
         "会心ダメージ下限", min_value=0, value=st.session_state.get("crit_min", 2000), key="crit_min"
@@ -53,7 +48,6 @@ with st.form("atk_form", clear_on_submit=False):
         "会心ダメージ上限", min_value=0, value=st.session_state.get("crit_max", 4000), key="crit_max"
     )
 
-    # 3行目: 会心確率とヒット数
     row3 = st.columns(2)
     crit_rate = row3[0].number_input(
         "会心確率(%)", min_value=0.0, max_value=100.0, value=st.session_state.get("crit_rate", 50.0), key="crit_rate"
@@ -62,13 +56,12 @@ with st.form("atk_form", clear_on_submit=False):
         "ヒット数", min_value=1, value=st.session_state.get("hits", 1), step=1, key="hits"
     )
 
-    # 4行目: 追加ボタン（中央配置・横幅いっぱい）
+    # 4行目: 追加ボタン（中央）
     btn_col1, btn_col2, btn_col3 = st.columns([1,2,1])
     with btn_col2:
         submitted = st.form_submit_button("追加", use_container_width=True)
 
     if submitted:
-        # バリデーション
         if normal_min > normal_max:
             st.error("通常ダメージ下限は上限以下でなければなりません。")
         elif crit_min > crit_max:
@@ -89,22 +82,20 @@ with st.form("atk_form", clear_on_submit=False):
 st.subheader("攻撃パターン一覧")
 
 if st.session_state.dataset:
-    # ヘッダー行
     header_cols = st.columns([0.1, 1, 1, 1, 1, 0.7, 0.7, 0.3])
     headers = ["No.", "通常下限", "通常上限", "会心下限", "会心上限", "会心率(%)", "ヒット数", ""]
     for c, h in zip(header_cols, headers):
         c.markdown(f"<div style='text-align:center;font-weight:bold'>{h}</div>", unsafe_allow_html=True)
 
-    # 各行
     for i, entry in enumerate(st.session_state.dataset):
         cols = st.columns([0.1, 1, 1, 1, 1, 0.7, 0.7, 0.3], gap=None)
         cols[0].markdown(f"<div style='text-align:center'>{i+1}</div>", unsafe_allow_html=True)
-        cols[1].markdown(f"<div style='text-align:center'>{int(entry['normal_min'])}</div>", unsafe_allow_html=True)
-        cols[2].markdown(f"<div style='text-align:center'>{int(entry['normal_max'])}</div>", unsafe_allow_html=True)
-        cols[3].markdown(f"<div style='text-align:center'>{int(entry['crit_min'])}</div>", unsafe_allow_html=True)
-        cols[4].markdown(f"<div style='text-align:center'>{int(entry['crit_max'])}</div>", unsafe_allow_html=True)
+        cols[1].markdown(f"<div style='text-align:center'>{entry['normal_min']}</div>", unsafe_allow_html=True)
+        cols[2].markdown(f"<div style='text-align:center'>{entry['normal_max']}</div>", unsafe_allow_html=True)
+        cols[3].markdown(f"<div style='text-align:center'>{entry['crit_min']}</div>", unsafe_allow_html=True)
+        cols[4].markdown(f"<div style='text-align:center'>{entry['crit_max']}</div>", unsafe_allow_html=True)
         cols[5].markdown(f"<div style='text-align:center'>{entry['crit_rate']:.2f}</div>", unsafe_allow_html=True)
-        cols[6].markdown(f"<div style='text-align:center'>{int(entry['hits'])}</div>", unsafe_allow_html=True)
+        cols[6].markdown(f"<div style='text-align:center'>{entry['hits']}</div>", unsafe_allow_html=True)
         if cols[7].button("削除", key=f"del_row_{i}"):
             st.session_state.dataset.pop(i)
             st.success(f"行 {i+1} を削除しました。")
@@ -114,7 +105,16 @@ else:
 
 # --- シミュレーション設定 ---
 st.subheader("シミュレーション設定")
-target_damage = st.number_input("目標ダメージ", min_value=0, value=7000000)
+
+mode = st.radio("成功条件", ["通常", "範囲"], index=0, horizontal=True)
+
+if mode == "通常":
+    target_damage = st.number_input("目標ダメージ", min_value=0, value=7000000)
+else:
+    range_cols = st.columns(2)
+    target_damage_min = range_cols[0].number_input("目標ダメージ下限", min_value=0, value=7000000)
+    target_damage_max = range_cols[1].number_input("目標ダメージ上限", min_value=0, value=8000000)
+
 num_trials = st.number_input("試行回数", min_value=1000, value=100000, step=1000)
 
 # --- シミュレーション実行 ---
@@ -143,8 +143,13 @@ if st.button("シミュレーション開始"):
                             dmg = np.random.uniform(atk["normal_min"], atk["normal_max"])
                         total_damage += dmg
 
-                if total_damage > target_damage:
-                    count_exceed += 1
+                # 成功判定
+                if mode == "通常":
+                    if total_damage >= target_damage:
+                        count_exceed += 1
+                else:
+                    if target_damage_min <= total_damage <= target_damage_max:
+                        count_exceed += 1
 
             progress_bar.progress(batch_end / num_trials)
             prob_so_far = count_exceed / batch_end
